@@ -1,0 +1,7 @@
+{
+  "name": "rigfindr",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
