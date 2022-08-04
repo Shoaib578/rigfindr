@@ -94,6 +94,8 @@ export default function LoadInfo(){
             requested_by:parse.id,
             requested_to:history.location.state.request_to,
             status:"",
+            is_removed:0,
+
             load_id:history.location.state.load_id
     
         })

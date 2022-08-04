@@ -37,7 +37,16 @@ function Requests() {
     let id =parse.id
     
     console.log(id)
-    const req_query = query(RequestsCollectionRef,type=="sent"?where("requested_by","==",id):where("requested_to","==",id))
+    let req_query = ""  
+    if(type == "sent"){
+     req_query = query(RequestsCollectionRef,where("requested_by","==",id),where("is_removed","==",0))
+
+    }else{
+     req_query = query(RequestsCollectionRef,where("requested_to","==",id),where("is_removed","==",0))
+
+    }
+
+     
      await getDocs(req_query)
      .then(requests_snapShot=>{
       let temp_data =[]

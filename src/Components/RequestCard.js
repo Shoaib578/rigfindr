@@ -80,9 +80,12 @@ export default class RequestCard extends React.Component {
 
   RemoveRequest = async()=>{
     const req_doc = doc(RequestsCollectionRef,this.props.data.id)
-    await deleteDoc(req_doc)
+    let new_values = {
+      is_removed:1
+    }
+    await updateDoc(req_doc,new_values)
     .then(res=>{
-      this.props.getRequests()
+      this.props.getRequests(this.props.type)
       this.setState({alertMessage:"Deleted",showAlert:true})
 
     })
