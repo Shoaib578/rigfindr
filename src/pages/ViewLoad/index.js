@@ -31,9 +31,12 @@ export default function ViewLoad(props){
     const history = useHistory()
     const [ModalOpen,setModalOpen] = useState(false)
     const [FilterEqType,setFilterEqType] = useState("")
+    const [FilterMiles,setFilterMiles] = useState(0)
     const [FilterLocation,setFilterLocation] = useState("")
     
-   
+    const [FilteredCarriers,setFilteredCarriers] = useState([])
+
+
         const getLoad = async()=>{
             let load_doc = doc(LoadsCollectionRef,history.location.state.id)
             await getDoc(load_doc)
@@ -47,29 +50,52 @@ export default function ViewLoad(props){
 
         }
 
-    
+       const calcCrow = (lat1, lon1, lat2, lon2)=>{
+      
+            var R = 6371; // km
+            var dLat = toRad(lat2-lat1);
+            var dLon = toRad(lon2-lon1);
+            var lat1 = toRad(lat1);
+            var lat2 = toRad(lat2);
+      
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            var d = R * c;
+            
+            return d
+          }
+      
+          // Converts numeric degrees to radians
+       const  toRad = (Value)=> {
+              return Value * Math.PI / 180;
+          }
+          
 
 
        async function FilterCarriers(){
         
-            if(FilterEqType.length<1 && FilterLocation.length<1){
+            if(FilterEqType.length<1 && FilterLocation.length<1 && FilterMiles<1){
                 return false
 
             }
 
             let carriers_query = ""
-
+            let parse = ""
+            if(isPlatform("android") || isPlatform("ios")){
+              let user = await Storage.get({key:"user"})
+              parse = JSON.parse(user.value)
+              
+        
+            }else{
+        
+             const user = window.localStorage.getItem("user")
+              parse = JSON.parse(user)
+              
+        
+        
+            }
             if(FilterEqType.length>0 && FilterLocation.length<1){
                 carriers_query = query(UserCollectionRef,where("role","==","carrier"),where("eq_type","==",FilterEqType))
-            }else if(FilterEqType.length<1 && FilterLocation.length>0){
-                carriers_query = query(UserCollectionRef,where("role","==","carrier"),where("address","==",FilterLocation))
-
-            }else if(FilterEqType.length>0 && FilterLocation.length>0){
-                carriers_query = query(UserCollectionRef,where("role","==","carrier"),where("eq_type","==",FilterEqType),where("address","==",FilterLocation))
-
-            }
-
-           
                 let snapShot =await  getDocs(carriers_query)
                     
                 let carrier_obj = { }
@@ -91,6 +117,82 @@ export default function ViewLoad(props){
                 
                 parentDiv.insertBefore(dataChild,dataChild)
                 setCarriers(eq_temp_data)
+                setFilteredCarriers(eq_temp_data)
+
+            }else if(FilterEqType.length<1 && FilterLocation.length>0){
+                carriers_query = query(UserCollectionRef,where("role","==","carrier"),where("address","==",FilterLocation))
+                let snapShot =await  getDocs(carriers_query)
+                    
+                let carrier_obj = { }
+                let eq_temp_data = []
+                console.log(snapShot.size)
+                snapShot.docs.forEach(data=>{
+    
+                    carrier_obj = {
+                        data:data.data(),
+                        id:data.id
+                    }
+                    eq_temp_data.push(carrier_obj)
+    
+                })
+    
+    
+                var parentDiv = document.getElementById("dataDiv")
+                var dataChild = document.getElementById("list")
+                
+                parentDiv.insertBefore(dataChild,dataChild)
+                setCarriers(eq_temp_data)
+                setFilteredCarriers(eq_temp_data)
+
+            }else if(FilterEqType.length>0 && FilterLocation.length>0){
+                carriers_query = query(UserCollectionRef,where("role","==","carrier"),where("eq_type","==",FilterEqType),where("address","==",FilterLocation))
+                let snapShot =await  getDocs(carriers_query)
+                    
+                let carrier_obj = { }
+                let eq_temp_data = []
+                console.log(snapShot.size)
+                snapShot.docs.forEach(data=>{
+    
+                    carrier_obj = {
+                        data:data.data(),
+                        id:data.id
+                    }
+                    eq_temp_data.push(carrier_obj)
+    
+                })
+    
+    
+                var parentDiv = document.getElementById("dataDiv")
+                var dataChild = document.getElementById("list")
+                
+                parentDiv.insertBefore(dataChild,dataChild)
+                setCarriers(eq_temp_data)
+                setFilteredCarriers(eq_temp_data)
+                
+            }
+
+
+            if(FilterMiles>0){
+                
+                let temp_carrier_data= []
+               
+                
+                carriers.filter(carrier=>{
+                  console.log("In Miles"+carrier.data.firstname)
+                  console.log(parseFloat(calcCrow(parse.data.latitude,parse.data.longitude,carrier.data.latitude,carrier.data.longitude)).toFixed(0))
+                  if(parseFloat(calcCrow(parse.data.latitude,parse.data.longitude,carrier.data.latitude,carrier.data.longitude)).toFixed(0)<=parseFloat(FilterMiles).toFixed(0)){
+                    temp_carrier_data.push(carrier)
+                  }
+
+             
+                })
+                  
+                
+               setFilteredCarriers(temp_carrier_data)
+
+                }
+           
+                
            
           
                 setModalOpen(false)
@@ -120,10 +222,21 @@ export default function ViewLoad(props){
             })
 
             setCarriers(temp_data)
+            setFilteredCarriers(temp_data)
            
         }
 
-        
+        const ClearAllFilters = ()=>{
+            
+            setCarriers([])
+            setFilteredCarriers([])
+            setFilterEqType("")
+            setFilterMiles(0)
+            setFilterLocation("")
+            getCarriers()
+            setModalOpen(false)
+  
+          }
 
         useIonViewDidEnter(()=>{
            
@@ -188,7 +301,7 @@ export default function ViewLoad(props){
                    
                   
               
-                {carriers.map((item,index)=>{
+                {FilteredCarriers.map((item,index)=>{
                     
                     return <CarrierCard id="list" lat={parseFloat(item.data.latitude)} lng={parseFloat(item.data.longitude)} getLoad={getLoad} load_id={id} data={item} key={index} />
                 })}
@@ -258,9 +371,29 @@ export default function ViewLoad(props){
                 </IonRow>
 
 
+                <IonRow>
+                <IonCol  style={{marginTop:20}}>
+                    <IonItem >
+                    <IonLabel  position="floating">Miles</IonLabel>
+                    <IonInput
+                    
+                        type="number"
+                        value={FilterMiles}
+                        onIonChange={(val)=>{
+                          setFilterMiles(val.target.value)
+                          }}
+                        >
+                    </IonInput>
+                    </IonItem>
+                </IonCol>
+                </IonRow>
+
 
                 <IonButton  onClick={FilterCarriers} style={{marginTop:60}} expand="block">
                 Filter
+                </IonButton>
+                <IonButton  onClick={ClearAllFilters} style={{marginTop:20}} expand="block">
+                Clear All Filters
                 </IonButton>
         </IonContent>
         </IonModal>

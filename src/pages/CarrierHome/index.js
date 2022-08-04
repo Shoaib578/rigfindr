@@ -12,6 +12,7 @@ import { location, personCircle } from 'ionicons/icons';
 import { Geolocation } from '@capacitor/geolocation';
 
 import '../../styles/styles.css'
+import LoadsForCarrierCards from '../../Components/LoadsForCarrierCards';
 const LoadsCollectionRef = collection(db,"loads")
 const UserCollectionRef = collection(db,"user")
 
@@ -24,15 +25,15 @@ const defaultProps = {
     },
     zoom: 11
   };
-export default class Home extends React.Component{
+export default class CarrierHome extends React.Component{
     state = {
-      carriers:[],
+     
       ModalOpen:false,
       FilterEqType:"",
       FilterLocation:"",
-      center:"",
+      
       FilterMiles:0,
-      FilteredCarriers:[]
+      FilteredLoads:[]
 
     }
     
@@ -58,9 +59,10 @@ export default class Home extends React.Component{
     }
     
 
-         FilterCarriers = async ()=>{
-          
+         FilterLoads = async ()=>{
+            console.log("Hellow")
             if(this.state.FilterEqType.length<1 && this.state.FilterLocation.length<1 && this.state.FilterMiles <1){
+              console.log("Hello")
                 return false
 
             }
@@ -80,22 +82,22 @@ export default class Home extends React.Component{
     
         }
 
-            let carriers_query = ""
+            let load_query = ""
 
             if(this.state.FilterEqType.length>0 && this.state.FilterLocation.length<1){
-                carriers_query = query(UserCollectionRef,where("role","==","carrier"),where("eq_type","==",this.state.FilterEqType))
-                let snapShot =await  getDocs(carriers_query)
+                load_query = query(LoadsCollectionRef,where("eq_type","==",this.state.FilterEqType))
+                let snapShot =await  getDocs(load_query)
                     
-                let carrier_obj = { }
+                let load_obj = { }
                 let eq_temp_data = []
                 console.log(snapShot.size)
                 snapShot.docs.forEach(data=>{
     
-                    carrier_obj = {
+                  load_obj = {
                         data:data.data(),
                         id:data.id
                     }
-                    eq_temp_data.push(carrier_obj)
+                    eq_temp_data.push(load_obj)
     
                 })
     
@@ -104,23 +106,23 @@ export default class Home extends React.Component{
                 var dataChild = document.getElementById("list")
                 
                 parentDiv.insertBefore(dataChild,dataChild)
-                this.setState({carriers:eq_temp_data},()=>{
-                  this.setState({FilteredCarriers:this.state.carriers})
+                this.setState({loads:eq_temp_data},()=>{
+                  this.setState({FilteredLoads:this.state.loads})
                 })
             }else if(this.state.FilterEqType.length<1 && this.state.FilterLocation.length>0){
-                carriers_query = query(UserCollectionRef,where("role","==","carrier"),where("address","==",this.state.FilterLocation))
-                let snapShot =await  getDocs(carriers_query)
+                load_query = query(LoadsCollectionRef,where("address","==",this.state.FilterLocation))
+                let snapShot =await  getDocs(load_query)
                     
-                let carrier_obj = { }
+                let load_obj = { }
                 let eq_temp_data = []
                 console.log(snapShot.size)
                 snapShot.docs.forEach(data=>{
     
-                    carrier_obj = {
+                    load_obj = {
                         data:data.data(),
                         id:data.id
                     }
-                    eq_temp_data.push(carrier_obj)
+                    eq_temp_data.push(load_obj)
     
                 })
     
@@ -129,23 +131,23 @@ export default class Home extends React.Component{
                 var dataChild = document.getElementById("list")
                 
                 parentDiv.insertBefore(dataChild,dataChild)
-                this.setState({carriers:eq_temp_data},()=>{
-                  this.setState({FilteredCarriers:this.state.carriers})
+                this.setState({loads:eq_temp_data},()=>{
+                  this.setState({FilteredLoads:this.state.loads})
                 })
             }else if(this.state.FilterEqType.length>0 && this.state.FilterLocation.length>0){
-                carriers_query = query(UserCollectionRef,where("role","==","carrier"),where("eq_type","==",this.state.FilterEqType),where("address","==",this.state.FilterLocation))
-                let snapShot =await  getDocs(carriers_query)
+                load_query = query(LoadsCollectionRef,where("eq_type","==",this.state.FilterEqType),where("address","==",this.state.FilterLocation))
+                let snapShot =await  getDocs(load_query)
                     
-                let carrier_obj = { }
+                let load_obj = { }
                 let eq_temp_data = []
                 console.log(snapShot.size)
                 snapShot.docs.forEach(data=>{
     
-                    carrier_obj = {
+                  load_obj = {
                         data:data.data(),
                         id:data.id
                     }
-                    eq_temp_data.push(carrier_obj)
+                    eq_temp_data.push(load_obj)
     
                 })
     
@@ -154,8 +156,8 @@ export default class Home extends React.Component{
                 var dataChild = document.getElementById("list")
                 
                 parentDiv.insertBefore(dataChild,dataChild)
-                this.setState({carriers:eq_temp_data},()=>{
-                  this.setState({FilteredCarriers:this.state.carriers})
+                this.setState({loads:eq_temp_data},()=>{
+                  this.setState({FilteredLoads:this.state.loads})
                 })
             }
 
@@ -167,21 +169,21 @@ export default class Home extends React.Component{
                 
                 if(this.state.FilterMiles>0){
                 
-                let temp_carrier_data= []
+                let temp_loads_data= []
                
                 
-                this.state.carriers.filter(carrier=>{
-                  console.log("In Miles"+carrier.data.firstname)
-                  console.log(parseFloat(this.calcCrow(parse.data.latitude,parse.data.longitude,carrier.data.latitude,carrier.data.longitude)).toFixed(0))
-                  if(parseFloat(this.calcCrow(parse.data.latitude,parse.data.longitude,carrier.data.latitude,carrier.data.longitude)).toFixed(0)<=parseFloat(this.state.FilterMiles).toFixed(0)){
-                    temp_carrier_data.push(carrier)
+                this.state.loads.filter(load=>{
+                  console.log("In Miles"+load.data.load_title)
+                  console.log(parseFloat(this.calcCrow(parse.data.latitude,parse.data.longitude,load.data.latitude,load.data.longitude)).toFixed(0))
+                  if(parseFloat(this.calcCrow(parse.data.latitude,parse.data.longitude,load.data.latitude,load.data.longitude)).toFixed(0)<=parseFloat(this.state.FilterMiles).toFixed(0)){
+                    temp_loads_data.push(load)
                   }
 
              
                 })
                   
                 
-                this.setState({FilteredCarriers:temp_carrier_data})
+                this.setState({FilteredLoads:temp_loads_data})
 
                 }
 
@@ -191,28 +193,28 @@ export default class Home extends React.Component{
 
         }
 
-         getCarriers = async()=>{
+         getLoads = async()=>{
           
              
             
-            const carrier_query = query(UserCollectionRef,where("role","==","carrier"))
-            const snapShot =await getDocs(carrier_query)
-            
-            let carrier_obj = { }
-            let temp_data = []
            
+            const snapShot =await getDocs(LoadsCollectionRef)
+            
+            let load_obj = { }
+            let temp_data = []
+            console.log(snapShot.docs)
             snapShot.docs.forEach(data=>{
-
-                carrier_obj = {
+                console.log(data.data())
+                load_obj = {
                     data:data.data(),
                     id:data.id
                 }
-                temp_data.push(carrier_obj)
+                temp_data.push(load_obj)
 
             })
 
-           this.setState({carriers:temp_data},()=>{
-            this.setState({FilteredCarriers:this.state.carriers})
+           this.setState({loads:temp_data},()=>{
+            this.setState({FilteredLoads:this.state.loads})
            })
            
         }
@@ -242,19 +244,20 @@ export default class Home extends React.Component{
 
 
         ClearAllFilters = ()=>{
-          this.setState({carriers:[],FilteredCarriers:[],FilterEqType:"",FilterLocation:"",FilterMiles:0})
+          this.setState({loads:[],FilteredLoads:[],FilterEqType:"",FilterLocation:"",FilterMiles:0})
           this.getCarriers()
           this.setState({ModalOpen:false})
 
         }
 
-      componentDidMount(){
-        this.getUserDetails()
 
-            this.getCarriers()
-            
-      }
 
+        componentDidMount(){
+          this.getLoads()
+          this.getUserDetails()
+        }
+
+    
 
       
         render(){
@@ -288,7 +291,7 @@ export default class Home extends React.Component{
                     width: "100%",
                     padding:7
                 }}>
-                <h3 style={{marginLeft:5,color:"white"}}>Carriers</h3>
+                <h3 style={{marginLeft:5,color:"white"}}>Loads</h3>
                 <IonButton  onClick={() => this.setState({ModalOpen:true})}>Filter</IonButton>
 
 
@@ -309,9 +312,9 @@ export default class Home extends React.Component{
                    
                   
               
-                {this.state.FilteredCarriers.map((item,index)=>{
+                {this.state.FilteredLoads.map((item,index)=>{
                     
-                    return <CarrierCard id="list" lat={parseFloat(item.data.latitude)} lng={parseFloat(item.data.longitude)}   data={item} key={index} />
+                    return <LoadsForCarrierCards id="list" lat={parseFloat(item.data.latitude)} lng={parseFloat(item.data.longitude)}   data={item} key={index} />
                 })}
                
                    
@@ -401,7 +404,7 @@ export default class Home extends React.Component{
           
 
 
-                <IonButton  onClick={this.FilterCarriers} style={{marginTop:60}} expand="block">
+                <IonButton  onClick={this.FilterLoads} style={{marginTop:60}} expand="block">
                 Filter
                 </IonButton>
                 <IonButton  onClick={this.ClearAllFilters} style={{marginTop:20}} expand="block">

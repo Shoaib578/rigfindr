@@ -1,6 +1,6 @@
-import React,{useState,useEffect} from 'react';
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonItem, IonIcon, IonLabel, IonButton, IonRow,IonLoading,IonAlert,isPlatform, IonModal, IonButtons } from '@ionic/react';
-import {personCircle} from 'ionicons/icons';
+import React, { useEffect, useState } from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonCard, IonCardHeader,useIonViewDidEnter, IonCardSubtitle, IonCardTitle, IonCardContent, IonItem, IonIcon, IonLabel, IonButton, IonRow,IonLoading,IonAlert,isPlatform, IonModal, IonButtons } from '@ionic/react';
+import {cube, personCircle} from 'ionicons/icons';
 import {db,storage} from '../firebase';
 import { Storage } from '@capacitor/storage'
 
@@ -8,10 +8,9 @@ import {collection,addDoc, getDoc, getDocs, where, doc, query, deleteDoc,} from 
 import { useHistory } from 'react-router';
 
 const RequestsCollectionRef = collection(db,"requests")
-const UserCollectionRef = collection(db,"user")
 
 
-export default function CarrierCard(props) {
+export default function LoadsForCarrierCards(props) {
  
     const history = useHistory()
 
@@ -34,7 +33,7 @@ export default function CarrierCard(props) {
 
       console.log("Load ID  ")
       console.log(props.data.id)
-            const check_request_query = query(RequestsCollectionRef,where("requested_to","==",props.data.id),where("requested_by","==",parse.id))
+            const check_request_query = query(RequestsCollectionRef,where("load_id","==",props.data.id),where("requested_by","==",parse.id))
             let snapShot =await getDocs(check_request_query)
             if(snapShot.size>0){
                 setis_requested(true)
@@ -48,7 +47,6 @@ export default function CarrierCard(props) {
     useEffect(()=>{
       check_request()
     },[])
-    
         return (
            
                
@@ -61,19 +59,21 @@ export default function CarrierCard(props) {
 
 
               <IonIcon onClick={()=>{
+                console.log("Load ID")
+                 console.log(props.data.data.added_by)
                 const path = {
-                  pathname:"/carrier_info",
+                  pathname:"/load_info",
                   state:{
-                    request_to:props.data.id,
-                    load_id:props.load_id,
-                    screen:history.location.pathname
+                    request_to:props.data.data.added_by,
+                    load_id:props.data.id,
+                    
                   }
                   
                 }
                 history.push(path)
-              }} icon={personCircle}  style={{color:is_requested == false?'red':"#013220"}} size='large'/>
+              }} icon={cube}  style={{color:is_requested == false?'red':'#013220'}} size='large'/>
                 
-                    <p style={{width:100,height:30}}>{props.data.data.firstname} </p>
+                    <p style={{width:100,height:30}}>{props.data.data.load_title} </p>
                   
                   
                     

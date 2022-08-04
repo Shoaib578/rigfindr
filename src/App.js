@@ -45,7 +45,10 @@ import { Storage } from '@capacitor/storage';
 import CheckAuth from './pages/CheckAuth';
 import ViewLoad from './pages/ViewLoad';
 import CarrierInfo from './pages/CarrierInfo';
-import ShipperRequests from './pages/ShipperRequests';
+import Requests from './pages/Requests';
+import CarrierHome from './pages/CarrierHome';
+import LoadInfo from './pages/LoadInfo';
+
 
 setupIonicReact();
 
@@ -69,11 +72,13 @@ function App(){
     let user = window.localStorage.getItem("user")
     parse = JSON.parse(user)
   }
-  setUser(parse.data)
   if(parse != null){
     console.log("Not Null")
     setIsAuth(true)
+  setUser(parse.data)
+
     setRole(parse.data.role)
+
   }else{
     setIsAuth(false)
     
@@ -95,7 +100,9 @@ useEffect(()=>{
               <IonReactRouter>
                 <IonTabs>
                   <IonRouterOutlet>
-                    <Route exact path="/home" component={Home} />
+                    <Route exact path="/home"  >
+                  {role == "shipper"?<Home />:<CarrierHome />}
+                      </Route>
                      
                   
                     <Route exact path={"/loads"}>
@@ -113,8 +120,8 @@ useEffect(()=>{
 
                           </Route>
 
-                          <Route  exact path={"/shipper_requests"} >
-                          <ShipperRequests user={user}/>
+                          <Route  exact path={"/requests"} >
+                          <Requests user={user}/>
 
 
                           </Route>
@@ -122,6 +129,13 @@ useEffect(()=>{
 
                           <Route  exact path={"/carrier_info"} >
                           <CarrierInfo />
+
+
+                          </Route>
+
+
+                          <Route  exact path={"/load_info"} >
+                          <LoadInfo />
 
 
                           </Route>
@@ -182,10 +196,10 @@ useEffect(()=>{
                  </IonTabButton>:null}
 
 
-                 {role == "shipper"?<IonTabButton tab="shipper_request" href="/shipper_requests">
+                 <IonTabButton tab="request" href="/requests">
                    <IonIcon icon={personAdd} />
                    <IonLabel>Requests</IonLabel>
-                 </IonTabButton>:null}
+                 </IonTabButton>
                 
                     <IonTabButton tab="profile" href="/profile">
                       <IonIcon icon={person} />

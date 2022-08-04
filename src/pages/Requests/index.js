@@ -10,7 +10,7 @@ import RequestCard from '../../Components/RequestCard';
 import { useHistory } from 'react-router';
 const RequestsCollectionRef = collection(db,"requests")
 
-function ShipperRequests() {
+function Requests() {
   const [data,setData] = useState([])
   const [type,setType] = useState("")
   const history = useHistory()
@@ -103,4 +103,4 @@ function ShipperRequests() {
   );
 };
 
-export default ShipperRequests;
+export default Requests;
